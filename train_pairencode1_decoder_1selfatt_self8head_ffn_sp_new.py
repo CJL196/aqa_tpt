@@ -156,7 +156,7 @@ class RunPair:
                 # else:
                 #     assert (data['difficulty'].float() == target['difficulty'].float()).all()
                 # loss = 0.0
-                video_1 = data['video'].to(self.device)
+                video_1 = data['video'].to(self.device) # (batch_size, 分段数量, c, 段内帧数, h, w)
                 score_1 = data[score_key].unsqueeze(-1).to(self.device)
 
                 video_2 = target['video'].to(self.device)
@@ -165,8 +165,11 @@ class RunPair:
                 score_all.append(data['score'])
                 if not self.use_pretrain:
                     video_1, video_2 = torch.chunk(self.backbone(torch.cat([video_1, video_2], 0)), 2)
-
+                # video.shape = (batch_size, num_segments, dim)
                 out_prob, delta, logits_all = self.model(video_1, video_2)
+                # out_prob为只有一个元素的列表 out_prob[0].shape = (2*batch_size, 16)
+                # delta.shape = (2*batch_size, 16)
+                # logits_all.shape = (2 * batch_size, 2 * num_segments, num_cluster)
                 glabel_1, rlabel_1 = self.grouper.produce_label(score_2 - score_1)
                 glabel_2, rlabel_2 = self.grouper.produce_label(score_1 - score_2)
                 leaf_probs = out_prob[-1].reshape(batch_size * 2, -1)

@@ -124,7 +124,7 @@ class SevenPair(Dataset):
         else:
             video = self.load_video(action_class, sample_idx)
             start_idx = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95]
-            video = torch.stack([video[:, i: i + 8] for i in start_idx])  # 10*N, c, 16, h, w
+            video = torch.stack([video[:, i: i + 8] for i in start_idx])  # 20*N, c, 8, h, w
             data['video'] = video
         data['score'] = normalize(sample_score, action_class).astype(np.float32)
         data['class'] = int(action_class) - 1

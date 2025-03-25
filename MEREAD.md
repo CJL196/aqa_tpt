@@ -1,0 +1,1 @@
+python train_pairencode1_decoder_1selfatt_self8head_ffn_sp_new.py --epoch_num=250 --dataset=AQA_7 --bs_train=1 --bs_test=3 --use_pretrain=False --num_cluster=5 --margin_factor=3.2 --encode_video=False --hinge_loss=True --multi_hinge=True --d_model=512 --d_ffn=512 --exp_name=sp_new_103_5_3

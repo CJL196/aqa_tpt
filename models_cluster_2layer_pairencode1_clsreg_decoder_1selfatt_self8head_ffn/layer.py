@@ -21,11 +21,11 @@ class ActionDecoder(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
-    def forward(self, x):
+    def forward(self, x): # x.shape=(batch_size, num_segments, dim)
         bs, T, D = x.shape
-        query_embed = self.query_embed.weight.unsqueeze(0).repeat(bs, 1, 1)
-        tgt = torch.zeros_like(query_embed)
-        tgt, att1 = self.layers[0](x, tgt, query_embed)
+        query_embed = self.query_embed.weight.unsqueeze(0).repeat(bs, 1, 1) # query_embed.shape = (batch_size, num_cluster, dim)
+        tgt = torch.zeros_like(query_embed) # tgt.shape = (batch_size, num_cluster, dim)
+        tgt, att1 = self.layers[0](x, tgt, query_embed) # att1.shape = (batch_size, num_segments, num_cluster)
         tgt, att2 = self.layers[1](x, tgt, query_embed)
         att = torch.cat([att1, att2], dim=1)
         return tgt, att

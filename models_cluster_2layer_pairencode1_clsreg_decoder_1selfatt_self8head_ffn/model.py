@@ -63,25 +63,25 @@ class PairModel(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x1, x2, train=True):
-
-        x1, query_att1 = self.action_decoder(x1)
+    def forward(self, x1, x2, train=True): 
+        # x1.shape = x2.shape = (batch_size, num_segments, in_dim)
+        x1, query_att1 = self.action_decoder(x1) # x1.shape=(batch_size, num_cluster, dim), query_att1.shape=(batch_size, 2 * num_segments, num_cluster)
         x2, query_att2 = self.action_decoder(x2)
-        query_att = torch.cat((query_att1, query_att2), 0)
+        query_att = torch.cat((query_att1, query_att2), 0) # query_att.shape=(2 * batch_size, 2 * num_segments, num_cluster)
 
         if train:
-            pair_reprs1 = self.pair_encoder(x1, x2).mean(1)
+            pair_reprs1 = self.pair_encoder(x1, x2).mean(1) # 在最后一个维度的mlp
             pair_reprs2 = self.pair_encoder(x2, x1).mean(1)
-
-            feat_all = torch.cat((pair_reprs1, pair_reprs2), 0)
+            # pair_reprs1.shape = pair_reprs2.shape = (batch_size, dim)
+            feat_all = torch.cat((pair_reprs1, pair_reprs2), 0) # (2*batch_size, dim)
         else:
             pair_reprs2 = self.pair_encoder(x2, x1).mean(1)
             feat_all = pair_reprs2
             query_att = query_att1
 
-        cls = self.cls(feat_all)
+        cls = self.cls(feat_all) # cls.shape = (batch_size, 16) mlp分类头
         prob = F.log_softmax(cls, dim=-1)
-        reg = self.reg(feat_all)
+        reg = self.reg(feat_all) # reg.shape = (batch_size, 16) mlp
 
         return [prob], reg, query_att
 
